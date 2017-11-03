@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">PPCalculator</string>
+    <integer name="formula_limit">30</integer>
+</resources>
