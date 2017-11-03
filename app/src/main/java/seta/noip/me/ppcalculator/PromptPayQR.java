@@ -1,7 +1,10 @@
 package seta.noip.me.ppcalculator;
 
+import android.support.annotation.NonNull;
+
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 public class PromptPayQR {
     private static String ID_PAYLOAD_FORMAT = "00";
@@ -14,7 +17,7 @@ public class PromptPayQR {
 
     private static String PAYLOAD_FORMAT_EMV_QRCPS_MERCHANT_PRESENTED_MODE = "01";
     private static String POI_METHOD_STATIC = "11";
-    private static String POI_METHOD_DYNAMIC = "12";
+    //private static String POI_METHOD_DYNAMIC = "12";
     private static String MERCHANT_INFORMATION_TEMPLATE_ID_GUID = "00";
     public static String BOT_ID_MERCHANT_PHONE_NUMBER = "01";
     public static String BOT_ID_MERCHANT_TAX_ID = "02";
@@ -35,15 +38,23 @@ public class PromptPayQR {
         return proxyValue;
     }
 
-    private static String formatAmount(BigDecimal amount) {
-        DecimalFormat f = new DecimalFormat();
-        amount = amount.setScale(2, BigDecimal.ROUND_DOWN);
-        f.setMinimumFractionDigits(2);
-        f.setMaximumFractionDigits(2);
-        f.setGroupingUsed(false);
-        return f.format(amount);
+    private static String formatAmount(@NonNull BigDecimal amount) {
+        if (isWholeNumber(amount)) {
+            NumberFormat f = NumberFormat.getIntegerInstance();
+            f.setGroupingUsed(false);
+            return f.format(amount);
+        }
+        else {
+            DecimalFormat f = new DecimalFormat();
+            amount = amount.setScale(2, BigDecimal.ROUND_DOWN);
+            f.setMinimumFractionDigits(2);
+            f.setMaximumFractionDigits(2);
+            f.setGroupingUsed(false);
+            return f.format(amount);
+        }
     }
 
+    @NonNull
     private static String tag(String id, String value) {
         String v =  ("00" + value.length());
         return id + v.substring(v.length()-2) + value;
@@ -57,7 +68,7 @@ public class PromptPayQR {
         return buf;
     }
 
-    private static String crc16(String args) {
+    private static String crc16(@NonNull String args) {
         int crc = 0xFFFF;          // initial value
         int polynomial = 0x1021;   // 0001 0000 0010 0001  (0, 5, 12)
 
@@ -78,6 +89,7 @@ public class PromptPayQR {
         return Integer.toHexString(crc);
     }
 
+    @NonNull
     public static String payloadMoneyTransfer(String proxyType, String proxyValue, BigDecimal amount) {
         if (null == proxyType || null == proxyValue) {
             return "";
@@ -87,7 +99,8 @@ public class PromptPayQR {
 
         String [] elem =  {
                 tag(ID_PAYLOAD_FORMAT, PAYLOAD_FORMAT_EMV_QRCPS_MERCHANT_PRESENTED_MODE),
-                tag(ID_POI_METHOD, null==amount ? POI_METHOD_DYNAMIC : POI_METHOD_STATIC),
+                //tag(ID_POI_METHOD, null==amount ? POI_METHOD_DYNAMIC : POI_METHOD_STATIC),
+                tag(ID_POI_METHOD, POI_METHOD_STATIC),
                 tag(ID_MERCHANT_INFORMATION_BOT, serialize(
                         tag(MERCHANT_INFORMATION_TEMPLATE_ID_GUID, GUID_PROMPTPAY),
                         tag(proxyType, formatProxy(proxyType, sanitizedValue))
@@ -105,7 +118,7 @@ public class PromptPayQR {
         String crcTarget = payload.toString() + ID_CRC + "04";
 
         payload.append(tag(ID_CRC, crc16(crcTarget)));
-        return payload.toString();
+        return payload.toString().toUpperCase();
     }
 
     public static String guessProxyType(String proxyValue) {
@@ -115,5 +128,10 @@ public class PromptPayQR {
         if (sanitizedValue.length() == 10) return BOT_ID_MERCHANT_PHONE_NUMBER;
 
         return null; // default
+    }
+
+    private static boolean isWholeNumber(@NonNull BigDecimal number) {
+        return (number.scale() <= 0) ||
+                (number.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) == 0);
     }
 }
