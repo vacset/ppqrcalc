@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">PPCalculator</string>
     <integer name="formula_limit">30</integer>
+    <string name="proxyType">proxyType</string>
+    <string name="proxy">proxy</string>
+    <string name="alias">alias</string>
+    <string name="initPPID">Touch to set PP ID</string>
 </resources>

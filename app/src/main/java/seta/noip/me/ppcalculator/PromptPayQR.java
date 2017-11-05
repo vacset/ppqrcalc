@@ -25,7 +25,8 @@ public class PromptPayQR {
     private static String TRANSACTION_CURRENCY_THB = "764";
     private static String COUNTRY_CODE_TH = "TH";
 
-    private static String satinizeProxyValue(String proxyValue) {
+    public static String satinizeProxyValue(String proxyValue) {
+        if (null == proxyValue) return null;
         return proxyValue.replaceAll("[^0-9]", "");
     }
 
