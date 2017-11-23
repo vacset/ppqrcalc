@@ -17,10 +17,12 @@ public class PromptPayQR {
 
     private static String PAYLOAD_FORMAT_EMV_QRCPS_MERCHANT_PRESENTED_MODE = "01";
     private static String POI_METHOD_STATIC = "11";
-    //private static String POI_METHOD_DYNAMIC = "12";
+    private static String POI_METHOD_DYNAMIC = "12";
+
     private static String MERCHANT_INFORMATION_TEMPLATE_ID_GUID = "00";
     public static String BOT_ID_MERCHANT_PHONE_NUMBER = "01";
     public static String BOT_ID_MERCHANT_TAX_ID = "02";
+    public static String BOT_ID_MERCHANT_WALLET_ID = "15";//1400-0-0830723996
     private static String GUID_PROMPTPAY = "A000000677010111";
     private static String TRANSACTION_CURRENCY_THB = "764";
     private static String COUNTRY_CODE_TH = "TH";
@@ -33,7 +35,7 @@ public class PromptPayQR {
     private static String formatProxy(String proxyType, String proxyValue) {
         if (BOT_ID_MERCHANT_PHONE_NUMBER.equals(proxyType)) {
             String tmp = "0000000000000" + proxyValue.replaceFirst("^0", "66");
-            return tmp.substring(0, 13);
+            return tmp.substring(tmp.length() - 13);
         }
 
         return proxyValue;
@@ -100,8 +102,7 @@ public class PromptPayQR {
 
         String [] elem =  {
                 tag(ID_PAYLOAD_FORMAT, PAYLOAD_FORMAT_EMV_QRCPS_MERCHANT_PRESENTED_MODE),
-                //tag(ID_POI_METHOD, null==amount ? POI_METHOD_DYNAMIC : POI_METHOD_STATIC),
-                tag(ID_POI_METHOD, POI_METHOD_STATIC),
+                tag(ID_POI_METHOD, POI_METHOD_DYNAMIC),
                 tag(ID_MERCHANT_INFORMATION_BOT, serialize(
                         tag(MERCHANT_INFORMATION_TEMPLATE_ID_GUID, GUID_PROMPTPAY),
                         tag(proxyType, formatProxy(proxyType, sanitizedValue))
@@ -127,6 +128,7 @@ public class PromptPayQR {
         String sanitizedValue = satinizeProxyValue(proxyValue);
         if (sanitizedValue.length() == 13) return BOT_ID_MERCHANT_TAX_ID;
         if (sanitizedValue.length() == 10) return BOT_ID_MERCHANT_PHONE_NUMBER;
+        if (sanitizedValue.length() == 15) return BOT_ID_MERCHANT_WALLET_ID;
 
         return null; // default
     }
