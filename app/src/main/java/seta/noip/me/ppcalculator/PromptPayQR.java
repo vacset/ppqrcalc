@@ -27,6 +27,8 @@ public class PromptPayQR {
     private static String TRANSACTION_CURRENCY_THB = "764";
     private static String COUNTRY_CODE_TH = "TH";
 
+    private static String crcValue = "0000";
+
     public static String satinizeProxyValue(String proxyValue) {
         if (null == proxyValue) return null;
         return proxyValue.replaceAll("[^0-9]", "");
@@ -118,8 +120,8 @@ public class PromptPayQR {
         }
 
         String crcTarget = payload.toString() + ID_CRC + "04";
-
-        payload.append(tag(ID_CRC, crc16(crcTarget)));
+        crcValue = crc16(crcTarget);
+        payload.append(tag(ID_CRC, crcValue));
         return payload.toString().toUpperCase();
     }
 
@@ -131,6 +133,10 @@ public class PromptPayQR {
         if (sanitizedValue.length() == 15) return BOT_ID_MERCHANT_WALLET_ID;
 
         return null; // default
+    }
+
+    public static String getCrcValue() {
+        return crcValue;
     }
 
     private static boolean isWholeNumber(@NonNull BigDecimal number) {

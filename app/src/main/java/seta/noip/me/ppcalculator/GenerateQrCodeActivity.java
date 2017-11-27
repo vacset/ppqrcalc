@@ -9,11 +9,16 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.TextPaint;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -25,6 +30,10 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Arrays;
@@ -43,6 +52,8 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
     @BindView(R.id.qrImageView) ImageView qrImageView;
 
     private BigDecimal amount;
+    private Bitmap newImage;
+    private String crc;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,16 +97,16 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
             int width = bitMatrix.getWidth();
             int height = bitMatrix.getHeight();
 
-            Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+            newImage = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
 
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
 
-                    bmp.setPixel(x , y, bitMatrix.get(x,y) ? Color.BLACK : Color.WHITE);
+                    newImage.setPixel(x , y, bitMatrix.get(x,y) ? Color.BLACK : Color.WHITE);
                 }
             }
 
-            qrImageView.setImageBitmap(bmp);
+            qrImageView.setImageBitmap(newImage);
         } catch (WriterException e) {
             e.printStackTrace();
         }
@@ -108,7 +119,7 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         int width = bm.getWidth();
         int height = bm.getHeight();
 
-        Bitmap newImage = Bitmap.createBitmap(width, height, config);
+        newImage = Bitmap.createBitmap(width, height, config);
 
         Canvas c = new Canvas(newImage);
         c.drawBitmap(bm, 0, 0, null);
@@ -173,6 +184,40 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         };
         btnCalculator.setOnClickListener(listener);
 
+        View.OnClickListener shareListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickShare();
+            }
+        };
+        btnShare.setOnClickListener(shareListener);
+    }
+
+    private void onClickShare() {
+        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+        sharingIntent.setType("image/*");
+        sharingIntent.putExtra(Intent.EXTRA_STREAM, getImageUri(GenerateQrCodeActivity.this.getApplicationContext(), newImage));
+        startActivity(Intent.createChooser(sharingIntent, "Share via"));
+    }
+
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        try {
+            File cachePath = new File(inContext.getCacheDir(), "images");
+            cachePath.mkdirs(); // don't forget to make the directory
+            FileOutputStream stream = new FileOutputStream(cachePath + "/" + PromptPayQR.getCrcValue() + ".png");
+            inImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            stream.close();
+
+            Uri contentUri = FileProvider.getUriForFile(inContext,
+                    "seta.noip.me.ppcalculator.fileprovider",
+                    new File(cachePath, PromptPayQR.getCrcValue() + ".png"));
+            return contentUri;
+        } catch(IOException caught) {
+            if (LogConfig.LOG) {
+                Log.e(getClass().getName(), "images cannot be saved", caught);
+            }
+            return null;
+        }
     }
 
     private String mask(String proxyType, String proxy) {

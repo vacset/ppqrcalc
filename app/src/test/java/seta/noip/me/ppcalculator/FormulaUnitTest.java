@@ -111,6 +111,32 @@ public class FormulaUnitTest {
         f.append("1");
         assertEquals(-2, f.eval().doubleValue(), 0.0);
         assertEquals("-1-1", f.display());
+
+        f.clear();
+        f.append("3");
+        f.append(".");
+        assertEquals(3, f.eval().doubleValue(), 0.0);
+        assertEquals("3.", f.display());
+        f.append("5");
+        assertEquals(3.5, f.eval().doubleValue(), 0.0);
+        assertEquals("3.5", f.display());
+    }
+
+    @Test
+    public void testConstructor() throws Exception {
+        prepareMock();
+
+        Formula f = new Formula(mMockContext, "120");
+        assertEquals(120, f.eval().doubleValue(), 0.0);
+        assertEquals("120", f.display());
+
+        f = new Formula(mMockContext, "120.50");
+        assertEquals(120.50, f.eval().doubleValue(), 0.0);
+        assertEquals("120.50", f.display());
+
+        f = new Formula(mMockContext, "120.50*2+16");
+        assertEquals(120.50*2+16, f.eval().doubleValue(), 0.0);
+        assertEquals("120.50×2+16", f.display());
     }
 
     @Test
@@ -148,5 +174,41 @@ public class FormulaUnitTest {
         f.append("0");
         assertEquals(0, f.eval().doubleValue(), 0.0);
         assertEquals("-1÷0", f.display());
+        assertTrue(f.isInvalid());
+
+        f = new Formula(mMockContext, "1.00");
+        f.append(".");
+        assertEquals(1, f.eval().doubleValue(), 0.0);
+        assertEquals("1.00", f.display());
+
+        f = new Formula(mMockContext, "1.00+2.5");
+        f.append(".");
+        assertEquals(3.5, f.eval().doubleValue(), 0.0);
+        assertEquals("1.00+2.5", f.display());
+
+        f = new Formula(mMockContext, "1.00+2.5");
+        f.append("+");
+        f.append("+");
+        assertEquals(3.5, f.eval().doubleValue(), 0.0);
+        assertEquals("1.00+2.5+", f.display());
+
+        f.clear();
+        f.append("3");
+        f.append(".");
+        f.append("5");
+        f.append("+");
+        f.append("5");
+        f.append(".");
+        f.append("2");
+        f.append("2");
+        assertEquals(3.5+5.22, f.eval().doubleValue(), 0.01);
+        f.append(".");
+        assertEquals(3.5+5.22, f.eval().doubleValue(), 0.01);
+        assertEquals("3.5+5.22", f.display());
+        f.append("1");
+        assertEquals(3.5+5.221, f.eval().doubleValue(), 0.01);
+        assertEquals("3.5+5.221", f.display());
     }
+
+
 }
