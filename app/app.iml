@@ -117,13 +117,17 @@
     <orderEntry type="jdk" jdkName="Android API 25 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="TEST" name="com.android.support.test:exposed-instrumentation-api-publish-0.5" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.powermock:powermock-core:1.6.5@jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.powermock:powermock-module-junit4:1.6.5@jar" level="project" />
     <orderEntry type="library" scope="TEST" name="junit:junit:4.12@jar" level="project" />
     <orderEntry type="library" scope="TEST" name="javax.inject:javax.inject:1@jar" level="project" />
     <orderEntry type="library" name="com.android.support:support-compat-25.3.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.powermock:powermock-api-mockito-common:1.6.5@jar" level="project" />
     <orderEntry type="library" scope="TEST" name="com.squareup:javawriter:2.1.1@jar" level="project" />
     <orderEntry type="library" name="com.android.support:support-core-ui-25.3.0" level="project" />
     <orderEntry type="library" name="com.android.support:support-media-compat-25.3.0" level="project" />
     <orderEntry type="library" name="com.android.support:support-annotations:27.0.1@jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.mockito:mockito-core:1.10.19@jar" level="project" />
     <orderEntry type="library" name="net.objecthunter:exp4j:0.4.4@jar" level="project" />
     <orderEntry type="library" name="com.android.support:support-v4-25.3.0" level="project" />
     <orderEntry type="library" name="com.android.support.constraint:constraint-layout-solver:1.1.0-beta3@jar" level="project" />
@@ -132,18 +136,24 @@
     <orderEntry type="library" name="com.google.zxing:core:3.3.1@jar" level="project" />
     <orderEntry type="library" scope="TEST" name="org.hamcrest:hamcrest-core:1.3@jar" level="project" />
     <orderEntry type="library" name="com.jakewharton:butterknife-8.8.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.javassist:javassist:3.20.0-GA@jar" level="project" />
     <orderEntry type="library" name="com.jakewharton:butterknife-annotations:8.8.1@jar" level="project" />
     <orderEntry type="library" scope="TEST" name="com.android.support.test.espresso:espresso-core-2.2.2" level="project" />
     <orderEntry type="library" name="com.android.support:animated-vector-drawable-25.3.0" level="project" />
     <orderEntry type="library" name="com.android.support:support-core-utils-25.3.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.powermock:powermock-api-mockito:1.6.5@jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.powermock:powermock-reflect:1.6.5@jar" level="project" />
     <orderEntry type="library" name="com.android.support.constraint:constraint-layout-1.1.0-beta3" level="project" />
     <orderEntry type="library" scope="TEST" name="com.android.support.test:rules-0.5" level="project" />
     <orderEntry type="library" scope="TEST" name="org.hamcrest:hamcrest-library:1.3@jar" level="project" />
     <orderEntry type="library" scope="TEST" name="org.hamcrest:hamcrest-integration:1.3@jar" level="project" />
     <orderEntry type="library" name="com.android.support:appcompat-v7-25.3.0" level="project" />
     <orderEntry type="library" scope="TEST" name="com.android.support.test:runner-0.5" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.objenesis:objenesis:2.2@jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.powermock:powermock-api-support:1.6.5@jar" level="project" />
     <orderEntry type="library" scope="TEST" name="com.android.support.test.espresso:espresso-idling-resource-2.2.2" level="project" />
     <orderEntry type="library" scope="TEST" name="javax.annotation:javax.annotation-api:1.2@jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.powermock:powermock-module-junit4-common:1.6.5@jar" level="project" />
     <orderEntry type="library" name="com.android.support:support-vector-drawable-25.3.0" level="project" />
   </component>
 </module>

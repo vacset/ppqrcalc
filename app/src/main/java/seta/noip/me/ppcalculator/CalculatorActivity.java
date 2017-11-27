@@ -1,7 +1,9 @@
 package seta.noip.me.ppcalculator;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.animation.AlphaAnimation;
@@ -21,14 +23,16 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 
 import butterknife.BindInt;
+import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/** http://www.javahelps.com/2015/03/android-simple-calculator.html
- * this is where the calculator code comes from.
+/**
+ * Simple calculator that can display PromptPay QR code
  * I added formula display, intent return value, and qr intent invocation
  */
 public class CalculatorActivity extends AppCompatActivity {
+
     // IDs of all the numeric buttons
     private int[] numericButtons = {R.id.btnZero, R.id.btnOne, R.id.btnTwo, R.id.btnThree, R.id.btnFour, R.id.btnFive, R.id.btnSix, R.id.btnSeven, R.id.btnEight, R.id.btnNine};
     // IDs of all the operator buttons
@@ -38,6 +42,7 @@ public class CalculatorActivity extends AppCompatActivity {
     @BindView(R.id.txtResult) TextView txtResult;
     @BindView(R.id.btnQr) ImageButton btnQr;
     @BindInt(R.integer.formula_limit) int formulaLimit;
+    @BindString(R.string.unfinishedFormulaEndingSymbols) String unfinishedFormulaEndingSymbols;
 
     // Represent whether the lastly pressed key is numeric or not
     private boolean lastNumeric;
@@ -270,4 +275,5 @@ public class CalculatorActivity extends AppCompatActivity {
         lastEqual = true;
         return ret;
     }
+
 }

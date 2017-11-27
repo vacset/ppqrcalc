@@ -5,4 +5,7 @@
     <string name="proxy">proxy</string>
     <string name="alias">alias</string>
     <string name="initPPID">Touch to set PP ID</string>
+    <string name="unfinishedFormulaEndingSymbols">.+/*-</string>
+    <string name="divisionSign" translatable="false">\u00F7</string>
+    <string name="multiplicationSign" translatable="false">\u00D7</string>
 </resources>
