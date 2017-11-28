@@ -36,6 +36,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Arrays;
 
 import butterknife.BindView;
@@ -122,7 +123,6 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         newImage = Bitmap.createBitmap(width, height, config);
 
         Canvas c = new Canvas(newImage);
-        c.drawBitmap(bm, 0, 0, null);
 
         Paint bk = new Paint();
         TextPaint paint = new TextPaint();
@@ -194,14 +194,74 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
     }
 
     private void onClickShare() {
-        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
-        sharingIntent.setType("image/*");
-        sharingIntent.putExtra(Intent.EXTRA_STREAM, getImageUri(GenerateQrCodeActivity.this.getApplicationContext(), newImage));
-        startActivity(Intent.createChooser(sharingIntent, "Share via"));
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Any note to payer ?");
+
+        // Set up the input
+        final EditText input = new EditText(this);
+        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+
+        // Set up the buttons
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                NumberFormat nf = NumberFormat.getInstance();
+                nf.setGroupingUsed(true);
+                String amountLine = "Amount: " + nf.format(amount);
+                String noteToPayerLine = input.getText().toString();
+
+                // copy the QR into a new bitmap, to add some stuff like amount and note
+                Bitmap forSharing = Bitmap.createBitmap(newImage.getWidth(), newImage.getHeight() + 60,
+                        newImage.getConfig());
+                Canvas c = new Canvas(forSharing);
+                // create white background
+                Paint paint = new Paint();
+                paint.setStyle(Paint.Style.FILL);
+                paint.setColor(Color.WHITE);
+                c.drawRect(0, 0, newImage.getWidth(), newImage.getHeight() + 60, paint);
+                paint = null;
+
+                c.drawBitmap(newImage, 0, 0, null);
+
+                TextPaint txtPaint = new TextPaint();
+                txtPaint.setColor(Color.BLACK);
+                txtPaint.setStyle(Paint.Style.FILL);
+                txtPaint.setTextSize(24);
+                txtPaint.setAntiAlias(true);
+                int xpos = c.getWidth()/2 - (int)txtPaint.measureText(amountLine)/2;
+                int ypos = (int) ((c.getHeight() - 50) - ((txtPaint.descent() + txtPaint.ascent()) / 2)) ;
+
+                c.drawText(amountLine, xpos, ypos, txtPaint);
+
+                xpos = c.getWidth()/2 - (int)txtPaint.measureText(noteToPayerLine)/2;
+                ypos = (int) ((c.getHeight() - 20) - ((txtPaint.descent() + txtPaint.ascent()) / 2)) ;
+                c.drawText(noteToPayerLine, xpos, ypos, txtPaint);
+
+                Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                sharingIntent.setType("image/*");
+                sharingIntent.putExtra(Intent.EXTRA_STREAM,
+                        getImageUri(GenerateQrCodeActivity.this.getApplicationContext(), forSharing));
+                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, noteToPayerLine);
+                sharingIntent.putExtra(Intent.EXTRA_TEXT, noteToPayerLine);
+                startActivity(Intent.createChooser(sharingIntent, "Share via"));
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
     }
 
     public Uri getImageUri(Context inContext, Bitmap inImage) {
         try {
+            cleanCache(new File(inContext.getCacheDir(), "images"));
             File cachePath = new File(inContext.getCacheDir(), "images");
             cachePath.mkdirs(); // don't forget to make the directory
             FileOutputStream stream = new FileOutputStream(cachePath + "/" + PromptPayQR.getCrcValue() + ".png");
@@ -217,6 +277,16 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
                 Log.e(getClass().getName(), "images cannot be saved", caught);
             }
             return null;
+        }
+    }
+
+    private void cleanCache(File dir) {
+        if (!dir.exists()) return;
+
+        File[] files = dir.listFiles();
+
+        for (File file : files) {
+            file.delete();
         }
     }
 
