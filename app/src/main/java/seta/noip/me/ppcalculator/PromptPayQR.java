@@ -22,7 +22,7 @@ public class PromptPayQR {
     private static String MERCHANT_INFORMATION_TEMPLATE_ID_GUID = "00";
     public static String BOT_ID_MERCHANT_PHONE_NUMBER = "01";
     public static String BOT_ID_MERCHANT_TAX_ID = "02";
-    public static String BOT_ID_MERCHANT_WALLET_ID = "15";//1400-0-0830723996
+    public static String BOT_ID_MERCHANT_WALLET_ID = "03";//1400-0-0830723996
     private static String GUID_PROMPTPAY = "A000000677010111";
     private static String TRANSACTION_CURRENCY_THB = "764";
     private static String COUNTRY_CODE_TH = "TH";
@@ -91,7 +91,7 @@ public class PromptPayQR {
         }
 
         crc &= 0xffff;
-        return Integer.toHexString(crc);
+        return leftPad(Integer.toHexString(crc).toUpperCase(), "0", 4);
     }
 
     @NonNull
@@ -142,5 +142,17 @@ public class PromptPayQR {
     private static boolean isWholeNumber(@NonNull BigDecimal number) {
         return (number.scale() <= 0) ||
                 (number.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) == 0);
+    }
+
+    static String leftPad(String s, String p, int l) {
+        if (s.length() >= l) {
+            return s.substring(s.length()-l);
+        }
+
+        StringBuilder buff = new StringBuilder(s);
+        while (buff.length() < l) {
+            buff.insert(0, p);
+        }
+        return buff.toString();
     }
 }
