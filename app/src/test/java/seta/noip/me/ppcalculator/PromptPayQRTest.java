@@ -27,6 +27,10 @@ public class PromptPayQRTest {
         assertEquals("00020101021229370016A000000677010111021331006021521635802TH53037645403174630401C8",
                 PromptPayQR.payloadMoneyTransfer(PromptPayQR.BOT_ID_MERCHANT_TAX_ID,
                         "3100602152163", BigDecimal.valueOf(174)));
+        // amount 0 THB --> treat as static QR
+        assertEquals("00020101021129370016A000000677010111021331006021521635802TH530376463043245",
+                PromptPayQR.payloadMoneyTransfer(PromptPayQR.BOT_ID_MERCHANT_TAX_ID,
+                        "3100602152163", BigDecimal.valueOf(0)));
     }
 
     @Test

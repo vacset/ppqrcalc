@@ -29,7 +29,7 @@ public class PromptPayQR {
 
     private static String crcValue = "0000";
 
-    public static String satinizeProxyValue(String proxyValue) {
+    static String satinizeProxyValue(String proxyValue) {
         if (null == proxyValue) return null;
         return proxyValue.replaceAll("[^0-9]", "");
     }
@@ -73,6 +73,7 @@ public class PromptPayQR {
         return buf;
     }
 
+    @NonNull
     private static String crc16(@NonNull String args) {
         int crc = 0xFFFF;          // initial value
         int polynomial = 0x1021;   // 0001 0000 0010 0001  (0, 5, 12)
@@ -95,16 +96,22 @@ public class PromptPayQR {
     }
 
     @NonNull
-    public static String payloadMoneyTransfer(String proxyType, String proxyValue, BigDecimal amount) {
+    public static String payloadMoneyTransfer(String proxyType, String proxyValue, @NonNull BigDecimal amount) {
         if (null == proxyType || null == proxyValue) {
             return "";
         }
 
         String sanitizedValue = satinizeProxyValue(proxyValue);
 
+        // in case of amount 0, we want mobile banking user to be able to input amount
+        // if it's dynamic QR, some bank doesn't allow that.
+        String generationMethod = POI_METHOD_DYNAMIC;
+        if (amount.compareTo(BigDecimal.ZERO) == 0) {
+            generationMethod = POI_METHOD_STATIC;
+        }
         String [] elem =  {
                 tag(ID_PAYLOAD_FORMAT, PAYLOAD_FORMAT_EMV_QRCPS_MERCHANT_PRESENTED_MODE),
-                tag(ID_POI_METHOD, POI_METHOD_DYNAMIC),
+                tag(ID_POI_METHOD, generationMethod),
                 tag(ID_MERCHANT_INFORMATION_BOT, serialize(
                         tag(MERCHANT_INFORMATION_TEMPLATE_ID_GUID, GUID_PROMPTPAY),
                         tag(proxyType, formatProxy(proxyType, sanitizedValue))
@@ -115,7 +122,9 @@ public class PromptPayQR {
 
         StringBuffer payload = serialize(elem);
 
-        if (null != amount) {
+        // in case of amount 0, we want mobile banking user to be able to input amount
+        // if 0 amount is embedded in QR, some bank doesn't allow input.
+        if (amount.compareTo(BigDecimal.ZERO) != 0) {
             payload = payload.append(tag(ID_TRANSACTION_AMOUNT, formatAmount(amount)));
         }
 
