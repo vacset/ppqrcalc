@@ -9,9 +9,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -30,7 +28,6 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -54,7 +51,6 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
 
     private BigDecimal amount;
     private Bitmap newImage;
-    private String crc;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +75,7 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         f.setMaximumFractionDigits(2);
         f.setGroupingUsed(false);
 
-        amountInfoTextView.setText("Amount: THB " + f.format(amount));
+        amountInfoTextView.setText(String.format(getString(R.string.qr_amount), f.format(amount)));
 
         SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
         QRCodeWriter writer = new QRCodeWriter();
@@ -164,33 +160,35 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         alias = pref.getString(getString(R.string.alias), mask(proxyType, proxy));
 
         if (null == proxy || null == proxyType) {
-            proxyInfoTextView.setText("No PromptPay ID");
+            proxyInfoTextView.setText(R.string.promptpay_id_not_set);
         } else {
             proxyInfoTextView.setText(alias);
         }
     }
 
     private void setupHandlers() {
-        View.OnClickListener listener = new View.OnClickListener() {
+        btnCalculator.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // pass the amount back to calculator if any, and prepare to receive new amount back
-                Intent i = new Intent();
-                i.putExtra("amount", amount);
-                i.setClassName("seta.noip.me.ppcalculator",
-                        "seta.noip.me.ppcalculator.CalculatorActivity");
-                startActivityForResult(i, AMOUNT_REQUEST);
+                onClickCalculator();
             }
-        };
-        btnCalculator.setOnClickListener(listener);
+        });
 
-        View.OnClickListener shareListener = new View.OnClickListener() {
+        btnShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onClickShare();
             }
-        };
-        btnShare.setOnClickListener(shareListener);
+        });
+    }
+
+    private void onClickCalculator() {
+        // pass the amount back to calculator if any, and prepare to receive new amount back
+        Intent i = new Intent();
+        i.putExtra("amount", amount);
+        i.setClassName(CalculatorActivity.class.getPackage().getName(), //"seta.noip.me.ppcalculator",
+                CalculatorActivity.class.getCanonicalName()); //"seta.noip.me.ppcalculator.CalculatorActivity");
+        startActivityForResult(i, AMOUNT_REQUEST);
     }
 
     private void onClickShare() {
@@ -222,7 +220,6 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
                 paint.setStyle(Paint.Style.FILL);
                 paint.setColor(Color.WHITE);
                 c.drawRect(0, 0, newImage.getWidth(), newImage.getHeight() + 60, paint);
-                paint = null;
 
                 c.drawBitmap(newImage, 0, 0, null);
 
@@ -263,7 +260,11 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         try {
             cleanCache(new File(inContext.getCacheDir(), "images"));
             File cachePath = new File(inContext.getCacheDir(), "images");
-            cachePath.mkdirs(); // don't forget to make the directory
+            if(!cachePath.mkdirs()) { // don't forget to make the directory
+                if (LogConfig.LOG) {
+                    Log.e(getClass().getName(), "could not create directory: " + cachePath.toString());
+                }
+            }
             FileOutputStream stream = new FileOutputStream(cachePath + "/" + PromptPayQR.getCrcValue() + ".png");
             inImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
             stream.close();
@@ -286,7 +287,11 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         File[] files = dir.listFiles();
 
         for (File file : files) {
-            file.delete();
+            if(!file.delete()) {
+                if (LogConfig.LOG) {
+                    Log.e(getClass().getName(), "could not delete cache file: " + file.toString());
+                }
+            }
         }
     }
 
@@ -338,7 +343,7 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
                 editor.putString(getString(R.string.proxy), proxy);
                 editor.putString(getString(R.string.proxyType), proxyType);
                 editor.putString(getString(R.string.alias), alias);
-                editor.commit();
+                editor.apply();
 
                 setupQrImage();
             }

@@ -8,4 +8,6 @@
     <string name="unfinishedFormulaEndingSymbols">.+/*-</string>
     <string name="divisionSign" translatable="false">\u00F7</string>
     <string name="multiplicationSign" translatable="false">\u00D7</string>
+    <string name="qr_amount">Amount: THB %1$s</string>
+    <string name="promptpay_id_not_set">No PromptPay ID</string>
 </resources>
