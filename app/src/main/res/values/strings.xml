@@ -10,4 +10,6 @@
     <string name="multiplicationSign" translatable="false">\u00D7</string>
     <string name="qr_amount">Amount: THB %1$s</string>
     <string name="promptpay_id_not_set">No PromptPay ID</string>
+    <string name="share_note_label">Any note to payer ?</string>
+    <string name="error_label">Error</string>
 </resources>

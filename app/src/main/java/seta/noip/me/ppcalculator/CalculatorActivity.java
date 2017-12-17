@@ -1,9 +1,7 @@
 package seta.noip.me.ppcalculator;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.animation.AlphaAnimation;
@@ -13,14 +11,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.view.View;
 
-import net.objecthunter.exp4j.Expression;
-import net.objecthunter.exp4j.ExpressionBuilder;
-
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.text.ParseException;
 
 import butterknife.BindInt;
 import butterknife.BindString;
@@ -124,7 +116,7 @@ public class CalculatorActivity extends AppCompatActivity {
                     txtFormula.setText(formula.display());
                     txtResult.setText(formatAmount());
                     if (formula.isInvalid()) {
-                        txtResult.setText("Error");
+                        txtResult.setText(R.string.error_label);
                     }
                 }
             }
@@ -159,7 +151,7 @@ public class CalculatorActivity extends AppCompatActivity {
                     txtFormula.setText(formula.display());
                     txtResult.setText(formatAmount());
                     if (formula.isInvalid()) {
-                        txtResult.setText("Error");
+                        txtResult.setText(R.string.error_label);
                     }
                 }
             }

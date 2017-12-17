@@ -194,7 +194,7 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
     private void onClickShare() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Any note to payer ?");
+        builder.setTitle(R.string.share_note_label);
 
         // Set up the input
         final EditText input = new EditText(this);
