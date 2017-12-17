@@ -38,6 +38,9 @@ public class CalculatorActivity extends AppCompatActivity {
 
     // flag whether this activity is started by someone else who need result or not
     private boolean returnResult = false;
+    // flag when just received an amount from calling activity. If any modification occurs, reset this flag.
+    // this helps user to just overwrite the amount easily.
+    private boolean amountFromActivity = false;
     // current valid calculation result
     private Formula formula;
 
@@ -51,6 +54,7 @@ public class CalculatorActivity extends AppCompatActivity {
         BigDecimal amount = (BigDecimal) getIntent().getSerializableExtra("amount");
         if (null != amount) {
             formula = new Formula(this, amount.toString());
+            amountFromActivity = true;
         }
         else {
             formula = new Formula(this);
@@ -104,6 +108,10 @@ public class CalculatorActivity extends AppCompatActivity {
                 // Just append/set the text of clicked button
                 Button button = (Button) v;
                 CharSequence s = button.getText();
+                if (amountFromActivity) {
+                    formula.clear();
+                    amountFromActivity = false;
+                }
                 if (txtFormula.length() + s.length() > formulaLimit) {
                     Animation flasher = new AlphaAnimation(0.0f, 1.0f);
                     flasher.setDuration(50);
@@ -136,6 +144,7 @@ public class CalculatorActivity extends AppCompatActivity {
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                amountFromActivity = false;
                 // Just append/set the text of clicked button
                 Button button = (Button) v;
                 String s = button.getTag().toString();
@@ -189,6 +198,7 @@ public class CalculatorActivity extends AppCompatActivity {
             return;
         }
 
+        amountFromActivity = false;
         NumberFormat nf = NumberFormat.getInstance();
         nf.setGroupingUsed(false);
         formula = new Formula(this, nf.format(amount));
