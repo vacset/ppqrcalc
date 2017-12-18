@@ -23,6 +23,9 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.Target;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
@@ -36,6 +39,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
 
+import butterknife.BindInt;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -48,15 +52,21 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
     @BindView(R.id.btnCalculator) ImageButton btnCalculator;
     @BindView(R.id.btnShare) ImageButton btnShare;
     @BindView(R.id.qrImageView) ImageView qrImageView;
+    private ShowcaseView tutorialView;
 
     private BigDecimal amount;
     private Bitmap newImage;
+    private String proxyType;
+    private String proxy;
+    private String alias;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_generate_qr_code);
         ButterKnife.bind(this);
+
+        loadPreferencePPID();
 
         setupAliasDisplay();
         setupHandlers();
@@ -69,6 +79,33 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         textView2.setText("");
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (null == proxyType || null == proxy) {
+            setupTutorialInputPPID();
+        } else {
+            setupTutorialChangePPID();
+        }
+    }
+
+    private void loadPreferencePPID() {
+        SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+
+        proxyType = pref.getString(getString(R.string.proxyType), null);
+        proxy = pref.getString(getString(R.string.proxy), null);
+        alias = pref.getString(getString(R.string.alias), mask(proxyType, proxy));
+    }
+
+    private void savePreferencePPID() {
+        SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString(getString(R.string.proxy), proxy);
+        editor.putString(getString(R.string.proxyType), proxyType);
+        editor.putString(getString(R.string.alias), alias);
+        editor.apply();
+    }
+
     private void setupQrImage() {
         DecimalFormat f = new DecimalFormat();
         f.setMinimumFractionDigits(2);
@@ -77,17 +114,13 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
 
         amountInfoTextView.setText(String.format(getString(R.string.qr_amount), f.format(amount)));
 
-        SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
         QRCodeWriter writer = new QRCodeWriter();
+        if (null == proxyType || null == proxy) {
+            showUnknownQR();
+            return;
+        }
+
         try {
-            String proxyType = pref.getString(getString(R.string.proxyType), null);
-            String proxy = pref.getString(getString(R.string.proxy), null);
-
-            if (null == proxyType || null == proxy) {
-                showUnknownQR();
-                return;
-            }
-
             String content = PromptPayQR.payloadMoneyTransfer(proxyType, proxy, amount);
 
             BitMatrix bitMatrix = writer.encode(content, BarcodeFormat.QR_CODE, 512, 512);
@@ -105,8 +138,32 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
 
             qrImageView.setImageBitmap(newImage);
         } catch (WriterException e) {
-            e.printStackTrace();
+            if (LogConfig.LOG) {
+                Log.e(getClass().getName(), "cannot create QR bitmap", e);
+            }
         }
+    }
+
+    private void setupTutorialInputPPID() {
+        Target viewTarget = new ViewTarget(R.id.qrImageView, this);
+        tutorialView = new ShowcaseView.Builder(this)
+                .setTarget(viewTarget)
+                .setContentTitle(getString(R.string.tutorial_title_qrinput))
+                .setContentText(getString(R.string.tutorial_detail_qrinput))
+                .setStyle(R.style.CustomShowcaseTheme2)
+//                .singleShot(R.integer.tutorial_id_qrinput)
+                .build();
+    }
+
+    private void setupTutorialChangePPID() {
+        Target viewTarget = new ViewTarget(R.id.qrImageView, this);
+        tutorialView = new ShowcaseView.Builder(this)
+                .setTarget(viewTarget)
+                .setContentTitle(getString(R.string.tutorial_title_qrchange))
+                .setContentText(getString(R.string.tutorial_detail_qrchange))
+                .setStyle(R.style.CustomShowcaseTheme2)
+                .singleShot(R.integer.tutorial_id_qrchange)
+                .build();
     }
 
     private void showUnknownQR() {
@@ -142,23 +199,6 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
     }
 
     private void setupAliasDisplay() {
-        SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
-        String proxyType;
-        String proxy;
-        String alias;
-
-        proxyType = pref.getString(getString(R.string.proxyType), null);
-        proxy = pref.getString(getString(R.string.proxy), null);
-        View.OnClickListener listener = new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                setupProxyInfo();
-            }
-        };
-        qrImageView.setOnClickListener(listener);
-        alias = pref.getString(getString(R.string.alias), mask(proxyType, proxy));
-
         if (null == proxy || null == proxyType) {
             proxyInfoTextView.setText(R.string.promptpay_id_not_set);
         } else {
@@ -178,6 +218,15 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 onClickShare();
+            }
+        });
+
+        qrImageView.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                tutorialView.hide();
+                setupProxyInfo();
             }
         });
     }
@@ -330,20 +379,12 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String i = input.getText().toString();
-                String proxyType;
-                String proxy;
-                String alias;
 
                 proxyType = PromptPayQR.guessProxyType(i);
                 proxy = PromptPayQR.satinizeProxyValue(i);
                 alias = mask(proxyType, proxy);
                 proxyInfoTextView.setText(alias);
-                SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putString(getString(R.string.proxy), proxy);
-                editor.putString(getString(R.string.proxyType), proxyType);
-                editor.putString(getString(R.string.alias), alias);
-                editor.apply();
+                savePreferencePPID();
 
                 setupQrImage();
             }

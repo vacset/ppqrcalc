@@ -1,15 +1,28 @@
 <resources>
+        <!-- tutorial related -->
+    <integer name="tutorial_id_qrinput">1</integer>
+    <integer name="tutorial_id_qrchange">2</integer>
+
     <string name="app_name">ppqrcalc</string>
     <integer name="formula_limit">30</integer>
-    <string name="proxyType">proxyType</string>
-    <string name="proxy">proxy</string>
-    <string name="alias">alias</string>
+
+    <!-- preference keys -->
+    <string name="proxyType" translatable="false">proxyType</string>
+    <string name="proxy" translatable="false">proxy</string>
+    <string name="alias" translatable="false">alias</string>
+
+    <!-- labels -->
     <string name="initPPID">Touch to set PP ID</string>
     <string name="unfinishedFormulaEndingSymbols">.+/*-</string>
     <string name="divisionSign" translatable="false">\u00F7</string>
     <string name="multiplicationSign" translatable="false">\u00D7</string>
+    <string name="tutorialTheme" translatable="false">TutorialTheme</string>
     <string name="qr_amount">Amount: THB %1$s</string>
     <string name="promptpay_id_not_set">No PromptPay ID</string>
     <string name="share_note_label">Any note to payer ?</string>
     <string name="error_label">Error</string>
+    <string name="tutorial_title_qrinput">First time?</string>
+    <string name="tutorial_title_qrchange">Want to change your PromptPay ID ?</string>
+    <string name="tutorial_detail_qrinput">Touch the image on the middle to set up your PromptPay ID</string>
+    <string name="tutorial_detail_qrchange">Touch the image on the middle to change your PromptPay ID</string>
 </resources>

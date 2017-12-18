@@ -8,4 +8,23 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="CustomShowcaseTheme2" parent="ShowcaseView">
+        <item name="sv_backgroundColor">#e51249d9</item>
+        <item name="sv_showcaseColor">#25467A</item>
+        <item name="sv_buttonText">Close</item>
+        <item name="sv_titleTextAppearance">@style/TutorialTitle</item>
+        <item name="sv_detailTextAppearance">@style/TutorialText</item>
+    </style>
+
+    <style name="TutorialTitle" parent="TextAppearance.ShowcaseView.Title">
+        <item name="android:textColor">@color/yellow</item>
+        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Large.Inverse</item>
+        <item name="android:textStyle">italic</item>
+    </style>
+
+    <style name="TutorialText" parent="TextAppearance.ShowcaseView.Detail">
+        <item name="android:textColor">#deffffff</item>
+        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Medium</item>
+    </style>
+
 </resources>
