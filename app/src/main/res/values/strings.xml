@@ -3,7 +3,7 @@
     <integer name="tutorial_id_qrinput">1</integer>
     <integer name="tutorial_id_qrchange">2</integer>
 
-    <string name="app_name">ppqrcalc</string>
+    <string name="app_name" translatable="false">ppqrcalc</string>
     <integer name="formula_limit">30</integer>
 
     <!-- preference keys -->
