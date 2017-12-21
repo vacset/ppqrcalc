@@ -365,7 +365,7 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
 
     private void setupProxyInfo() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Your PP ID");
+        builder.setTitle(getString(R.string.ppid_input_title));
 
         // Set up the input
         final EditText input = new EditText(this);
