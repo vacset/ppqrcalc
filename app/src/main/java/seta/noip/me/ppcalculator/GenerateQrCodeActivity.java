@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.support.v4.content.FileProvider;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -45,19 +46,28 @@ import butterknife.ButterKnife;
 public class GenerateQrCodeActivity extends AppCompatActivity {
     static final int AMOUNT_REQUEST = 1;
 
+    @BindView(R.id.left_nav) ImageButton leftNav;
+    @BindView(R.id.right_nav) ImageButton rightNav;
     @BindView(R.id.proxyInfoTextView) TextView proxyInfoTextView;
     @BindView(R.id.amountInfoTextView) TextView amountInfoTextView;
     @BindView(R.id.textView2) TextView textView2;
     @BindView(R.id.btnCalculator) ImageButton btnCalculator;
     @BindView(R.id.btnShare) ImageButton btnShare;
-    @BindView(R.id.qrImageView) ImageView qrImageView;
+    @BindView(R.id.viewpager) ViewPager viewPager;
+
     private ShowcaseView tutorialView;
+    private SwipeFragmentAdapter swipeFragmentAdapter;
 
     private BigDecimal amount;
-    private Bitmap newImage;
-    private String proxyType;
-    private String proxy;
-    private String alias;
+    private AnyId anyId;
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public AnyId getAnyId() {
+        return  anyId;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,13 +85,16 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         amount = amount.setScale(2, BigDecimal.ROUND_DOWN);
 
         setupQrImage();
+        swipeFragmentAdapter = new SwipeFragmentAdapter(getSupportFragmentManager(), this);
+        viewPager.setAdapter(swipeFragmentAdapter);
+
         textView2.setText("");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (null == proxyType || null == proxy) {
+        if (null == anyId) {
             setupTutorialInputPPID();
         } else {
             setupTutorialChangePPID();
@@ -90,19 +103,27 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
 
     private void loadPreferencePPID() {
         SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+        AnyId id = new AnyId();
+        id.setIdType(pref.getString(getString(R.string.proxyType), null));
+        id.setIdValue(pref.getString(getString(R.string.proxy), null));
+        id.setAliasName(pref.getString(getString(R.string.alias), mask(id.getIdType(), id.getIdValue())));
 
-        proxyType = pref.getString(getString(R.string.proxyType), null);
-        proxy = pref.getString(getString(R.string.proxy), null);
-        alias = pref.getString(getString(R.string.alias), mask(proxyType, proxy));
+        if (null != id.getIdType() && null != id.getIdValue()) {
+            anyId = id;
+        } else {
+            anyId = null;
+        }
     }
 
     private void savePreferencePPID() {
         SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
-        editor.putString(getString(R.string.proxy), proxy);
-        editor.putString(getString(R.string.proxyType), proxyType);
-        editor.putString(getString(R.string.alias), alias);
-        editor.apply();
+        if (null != anyId) {
+            editor.putString(getString(R.string.proxy), anyId.getIdValue());
+            editor.putString(getString(R.string.proxyType), anyId.getIdType());
+            editor.putString(getString(R.string.alias), anyId.getAliasName());
+            editor.apply();
+        }
     }
 
     private void setupQrImage() {
@@ -113,34 +134,6 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
 
         amountInfoTextView.setText(String.format(getString(R.string.qr_amount), f.format(amount)));
 
-        QRCodeWriter writer = new QRCodeWriter();
-        if (null == proxyType || null == proxy) {
-            showUnknownQR();
-            return;
-        }
-
-        try {
-            String content = PromptPayQR.payloadMoneyTransfer(proxyType, proxy, amount);
-
-            BitMatrix bitMatrix = writer.encode(content, BarcodeFormat.QR_CODE, 512, 512);
-            int width = bitMatrix.getWidth();
-            int height = bitMatrix.getHeight();
-
-            newImage = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
-
-                    newImage.setPixel(x , y, bitMatrix.get(x,y) ? Color.BLACK : Color.WHITE);
-                }
-            }
-
-            qrImageView.setImageBitmap(newImage);
-        } catch (WriterException e) {
-            if (LogConfig.LOG) {
-                Log.e(getClass().getName(), "cannot create QR bitmap", e);
-            }
-        }
     }
 
     private void setupTutorialInputPPID() {
@@ -165,43 +158,11 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
                 .build();
     }
 
-    private void showUnknownQR() {
-        Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.icon_qr);
-        String initPPID = getString(R.string.initPPID);
-        Bitmap.Config config = bm.getConfig();
-        int width = bm.getWidth();
-        int height = bm.getHeight();
-
-        newImage = Bitmap.createBitmap(width, height, config);
-
-        Canvas c = new Canvas(newImage);
-
-        Paint bk = new Paint();
-        TextPaint paint = new TextPaint();
-        paint.setColor(Color.RED);
-        paint.setStyle(Paint.Style.FILL);
-        paint.setTextSize(24);
-        paint.setAntiAlias(true);
-        int xpos = c.getWidth()/2 - (int)paint.measureText(initPPID)/2;
-        int ypos = (int) ((c.getHeight() / 2) - ((paint.descent() + paint.ascent()) / 2)) ;
-        bk.setColor(Color.LTGRAY);
-        bk.setStyle(Paint.Style.FILL);
-        bk.setAlpha(180);
-
-        c.drawRect(xpos - 30, ypos - 30,
-                c.getWidth()/2 + (int)paint.measureText(initPPID)/2 + 30,
-                (int) ((c.getHeight() / 2) + ((paint.descent() + paint.ascent()) / 2)) + 30,
-                bk);
-        c.drawText(initPPID, xpos, ypos, paint);
-
-        qrImageView.setImageBitmap(newImage);
-    }
-
     private void setupAliasDisplay() {
-        if (null == proxy || null == proxyType) {
+        if (null == anyId) {
             proxyInfoTextView.setText(R.string.promptpay_id_not_set);
         } else {
-            proxyInfoTextView.setText(alias);
+            proxyInfoTextView.setText(anyId.getAliasName());
         }
     }
 
@@ -220,6 +181,21 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
             }
         });
 
+        leftNav.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                viewPager.arrowScroll(View.FOCUS_LEFT);
+            }
+        });
+
+        // Images right navigation
+        rightNav.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                viewPager.arrowScroll(View.FOCUS_RIGHT);
+            }
+        });
+/* TODO
         qrImageView.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -228,6 +204,7 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
                 setupProxyInfo();
             }
         });
+        */
     }
 
     private void onClickCalculator() {
@@ -249,7 +226,7 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
-
+        final Bitmap newImage = swipeFragmentAdapter.getBitmap(viewPager.getCurrentItem());
         // Set up the buttons
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
@@ -378,11 +355,11 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String i = input.getText().toString();
-
-                proxyType = PromptPayQR.guessProxyType(i);
-                proxy = PromptPayQR.satinizeProxyValue(i);
-                alias = mask(proxyType, proxy);
-                proxyInfoTextView.setText(alias);
+                anyId = new AnyId();
+                anyId.setIdType(PromptPayQR.guessProxyType(i));
+                anyId.setIdValue(PromptPayQR.satinizeProxyValue(i));
+                anyId.setAliasName(mask(anyId.getIdType(), anyId.getIdValue()));
+                proxyInfoTextView.setText(anyId.getAliasName());
                 savePreferencePPID();
 
                 setupQrImage();

@@ -6,6 +6,39 @@
     android:layout_height="match_parent"
     tools:context="seta.noip.me.ppcalculator.GenerateQrCodeActivity">
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/proxyInfoTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        >
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/viewpager"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            />
+
+        <ImageButton
+            android:id="@+id/left_nav"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_vertical|left"
+            android:src="@drawable/ic_chevron_left_black_24dp" />
+
+        <ImageButton
+            android:id="@+id/right_nav"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_vertical|right"
+            android:src="@drawable/ic_chevron_right_black_24dp" />
+
+    </FrameLayout>
+<!--
     <ImageView
         android:id="@+id/qrImageView"
         android:layout_width="0dp"
@@ -20,7 +53,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:color/white" />
-
+-->
     <TextView
         android:id="@+id/proxyInfoTextView"
         android:layout_width="wrap_content"
