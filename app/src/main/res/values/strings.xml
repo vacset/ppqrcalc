@@ -10,6 +10,7 @@
     <string name="proxyType" translatable="false">proxyType</string>
     <string name="proxy" translatable="false">proxy</string>
     <string name="alias" translatable="false">alias</string>
+    <string name="amount" translatable="false">amount</string>
 
     <!-- labels -->
     <string name="initPPID">Touch to set PP ID</string>

@@ -9,7 +9,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -137,18 +139,18 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
     }
 
     private void setupTutorialInputPPID() {
-        Target viewTarget = new ViewTarget(R.id.qrImageView, this);
+        Target viewTarget = new ViewTarget(R.id.viewpager, this);
         tutorialView = new ShowcaseView.Builder(this)
                 .setTarget(viewTarget)
                 .setContentTitle(getString(R.string.tutorial_title_qrinput))
                 .setContentText(getString(R.string.tutorial_detail_qrinput))
                 .setStyle(R.style.CustomShowcaseTheme2)
-//                .singleShot(R.integer.tutorial_id_qrinput)
+                .singleShot(R.integer.tutorial_id_qrinput)
                 .build();
     }
 
     private void setupTutorialChangePPID() {
-        Target viewTarget = new ViewTarget(R.id.qrImageView, this);
+        Target viewTarget = new ViewTarget(R.id.viewpager, this);
         tutorialView = new ShowcaseView.Builder(this)
                 .setTarget(viewTarget)
                 .setContentTitle(getString(R.string.tutorial_title_qrchange))
@@ -195,8 +197,8 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
                 viewPager.arrowScroll(View.FOCUS_RIGHT);
             }
         });
-/* TODO
-        qrImageView.setOnClickListener(new View.OnClickListener() {
+
+        viewPager.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -204,7 +206,7 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
                 setupProxyInfo();
             }
         });
-        */
+
     }
 
     private void onClickCalculator() {
@@ -226,7 +228,9 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
-        final Bitmap newImage = swipeFragmentAdapter.getBitmap(viewPager.getCurrentItem());
+        Fragment f = swipeFragmentAdapter.getItem(viewPager.getCurrentItem());
+        ImageView imgView = (ImageView) f.getView().findViewById(R.id.qrImageView);
+        final Bitmap newImage = ((BitmapDrawable)imgView.getDrawable()).getBitmap();
         // Set up the buttons
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
