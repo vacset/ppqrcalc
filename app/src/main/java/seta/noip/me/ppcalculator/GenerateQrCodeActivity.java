@@ -108,7 +108,7 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         AnyId id = new AnyId();
         id.setIdType(pref.getString(getString(R.string.proxyType), null));
         id.setIdValue(pref.getString(getString(R.string.proxy), null));
-        id.setAliasName(pref.getString(getString(R.string.alias), mask(id.getIdType(), id.getIdValue())));
+        id.setAliasName(pref.getString(getString(R.string.alias), id.mask()));
 
         if (null != id.getIdType() && null != id.getIdValue()) {
             anyId = id;
@@ -324,26 +324,6 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         }
     }
 
-    private String mask(String proxyType, String proxy) {
-        if (null == proxy || null == proxyType) {
-            return "";
-        }
-
-        if (PromptPayQR.BOT_ID_MERCHANT_PHONE_NUMBER.equals(proxyType)) {
-            return proxy.replaceFirst("(...)(...)(....)", "$1-XXX-$3");
-        }
-        else if (PromptPayQR.BOT_ID_MERCHANT_TAX_ID.equals(proxyType)) {
-            return proxy.replaceFirst("(.)(....)(.....)(...)", "$1-$2-XXXXX-$4");
-        }
-        else {
-            int n = proxy.length()-4;
-            char[] chars = new char[n];
-            Arrays.fill(chars, 'X');
-            String result = new String(chars) + proxy.substring(proxy.length()-4);
-            return result;
-        }
-    }
-
     private void setupProxyInfo() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(getString(R.string.ppid_input_title));
@@ -362,7 +342,7 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
                 anyId = new AnyId();
                 anyId.setIdType(PromptPayQR.guessProxyType(i));
                 anyId.setIdValue(PromptPayQR.satinizeProxyValue(i));
-                anyId.setAliasName(mask(anyId.getIdType(), anyId.getIdValue()));
+                anyId.setAliasName(anyId.mask());
                 proxyInfoTextView.setText(anyId.getAliasName());
                 savePreferencePPID();
 
