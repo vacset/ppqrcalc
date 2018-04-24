@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -29,10 +28,6 @@ import android.widget.TextView;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.QRCodeWriter;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -40,7 +35,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Arrays;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -58,7 +52,7 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
     @BindView(R.id.viewpager) ViewPager viewPager;
 
     private ShowcaseView tutorialView;
-    private SwipeFragmentAdapter swipeFragmentAdapter;
+    private QrImageFragmentAdapter swipeFragmentAdapter;
 
     private BigDecimal amount;
     private AnyId anyId;
@@ -87,7 +81,7 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         amount = amount.setScale(2, BigDecimal.ROUND_DOWN);
 
         setupQrImage();
-        swipeFragmentAdapter = new SwipeFragmentAdapter(getSupportFragmentManager(), this);
+        swipeFragmentAdapter = new QrImageFragmentAdapter(getSupportFragmentManager(), this);
         viewPager.setAdapter(swipeFragmentAdapter);
 
         textView2.setText("");

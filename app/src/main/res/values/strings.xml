@@ -13,7 +13,7 @@
     <string name="amount" translatable="false">amount</string>
 
     <!-- labels -->
-    <string name="initPPID">Touch to set PP ID</string>
+    <string name="qr_error">Error</string>
     <string name="unfinishedFormulaEndingSymbols" translatable="false">.+/*-</string>
     <string name="divisionSign" translatable="false">\u00F7</string>
     <string name="multiplicationSign" translatable="false">\u00D7</string>

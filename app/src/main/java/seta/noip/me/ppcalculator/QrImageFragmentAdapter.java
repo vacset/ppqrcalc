@@ -25,11 +25,11 @@ import com.google.zxing.qrcode.QRCodeWriter;
 
 import java.math.BigDecimal;
 
-public class SwipeFragmentAdapter extends FragmentPagerAdapter {
+public class QrImageFragmentAdapter extends FragmentPagerAdapter {
 
     private final GenerateQrCodeActivity activity;
 
-    public SwipeFragmentAdapter(FragmentManager fm, GenerateQrCodeActivity activity) {
+    public QrImageFragmentAdapter(FragmentManager fm, GenerateQrCodeActivity activity) {
         super(fm);
         this.activity = activity;
     }
@@ -48,10 +48,10 @@ public class SwipeFragmentAdapter extends FragmentPagerAdapter {
 
     public static class QrFragment extends Fragment {
 
-        private Bitmap showUnknownQR() {
-            Context ctx = getActivity();
+        static Bitmap showUnknownQR(Context ctx) {
+
             Bitmap bm = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.icon_qr);
-            String initPPID = ctx.getString(R.string.initPPID);
+            String initPPID = ctx.getString(R.string.qr_error);
             Bitmap.Config config = bm.getConfig();
             int width = bm.getWidth();
             int height = bm.getHeight();
@@ -80,8 +80,7 @@ public class SwipeFragmentAdapter extends FragmentPagerAdapter {
             return newImage;
         }
 
-        @Nullable
-        private Bitmap showAnyIdQR(AnyId anyId, BigDecimal amount) {
+        static Bitmap showAnyIdQR(Context ctx, AnyId anyId, BigDecimal amount) {
             try {
                 QRCodeWriter writer = new QRCodeWriter();
                 String content = PromptPayQR.payloadMoneyTransfer(anyId.getIdType(), anyId.getIdValue(), amount);
@@ -102,9 +101,9 @@ public class SwipeFragmentAdapter extends FragmentPagerAdapter {
                 return newImage;
             } catch (WriterException e) {
                 if (LogConfig.LOG) {
-                    Log.e(getClass().getName(), "cannot create QR bitmap", e);
+                    Log.e(QrImageFragmentAdapter.class.getName(), "cannot create QR bitmap", e);
                 }
-                return null; // Should not come here
+                return showUnknownQR(ctx);
             }
         }
 
@@ -121,9 +120,9 @@ public class SwipeFragmentAdapter extends FragmentPagerAdapter {
             anyId.setIdValue(bundle.getString(ctx.getString(R.string.proxy)));
 
             if (null == anyId.getIdType() && null == anyId.getIdValue()) {
-                imageView.setImageBitmap(showUnknownQR());
+                imageView.setImageResource(R.drawable.ic_add_box_black_24dp);
             } else {
-                imageView.setImageBitmap(showAnyIdQR(anyId, amount));
+                imageView.setImageBitmap(showAnyIdQR(ctx, anyId, amount));
             }
             return swipeView;
         }

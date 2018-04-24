@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ppqrcalc</string>
-    <string name="initPPID">แตะเพื่อตั้งเบอร์พร้อมเพย์</string>
+    <string name="qr_error">เจ๊ง</string>
     <string name="qr_amount">ยอดเงิน %1$s บาท</string>
     <string name="ppid_input_title">เบอร์พร้อมเพย์รับเงิน</string>
     <string name="promptpay_id_not_set">ยังไม่มีเบอร์พร้อมเพย์</string>
