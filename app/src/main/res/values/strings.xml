@@ -10,6 +10,9 @@
     <string name="proxyType" translatable="false">proxyType</string>
     <string name="proxy" translatable="false">proxy</string>
     <string name="alias" translatable="false">alias</string>
+    <string name="proxyTypeIndex" translatable="false">proxyType.%1$d</string>
+    <string name="proxyIndex" translatable="false">proxy.%1$d</string>
+    <string name="aliasIndex" translatable="false">alias.%1$d</string>
     <string name="amount" translatable="false">amount</string>
 
     <!-- labels -->

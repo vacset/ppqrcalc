@@ -29,6 +29,8 @@ import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -57,12 +59,16 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
     private BigDecimal amount;
     private AnyId anyId;
 
+    public final PropertyChangeListener changeLsnr = new PropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent e) {
+            anyId = (AnyId) e.getNewValue();
+            setupAliasDisplay();
+        }
+    };
+
     public BigDecimal getAmount() {
         return amount;
-    }
-
-    public AnyId getAnyId() {
-        return  anyId;
     }
 
     @Override
@@ -71,9 +77,6 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_generate_qr_code);
         ButterKnife.bind(this);
 
-        loadPreferencePPID();
-
-        setupAliasDisplay();
         setupHandlers();
 
         amount = (BigDecimal) getIntent().getSerializableExtra("amount");
@@ -94,20 +97,6 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
             setupTutorialInputPPID();
         } else {
             setupTutorialChangePPID();
-        }
-    }
-
-    private void loadPreferencePPID() {
-        SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
-        AnyId id = new AnyId();
-        id.setIdType(pref.getString(getString(R.string.proxyType), null));
-        id.setIdValue(pref.getString(getString(R.string.proxy), null));
-        id.setAliasName(pref.getString(getString(R.string.alias), id.mask()));
-
-        if (null != id.getIdType() && null != id.getIdValue()) {
-            anyId = id;
-        } else {
-            anyId = null;
         }
     }
 
@@ -213,6 +202,21 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
     }
 
     private void onClickShare() {
+        final Bitmap newImage = swipeFragmentAdapter.getQR(viewPager.getCurrentItem());
+        if (null == newImage) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.error_label);
+            builder.setMessage(R.string.promptpay_id_not_set);
+            builder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+
+            builder.show();
+            return;
+        }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.share_note_label);
@@ -222,9 +226,6 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
-        Fragment f = swipeFragmentAdapter.getItem(viewPager.getCurrentItem());
-        ImageView imgView = (ImageView) f.getView().findViewById(R.id.qrImageView);
-        final Bitmap newImage = ((BitmapDrawable)imgView.getDrawable()).getBitmap();
         // Set up the buttons
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
@@ -361,4 +362,5 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
             setupQrImage();
         }
     }
+
 }

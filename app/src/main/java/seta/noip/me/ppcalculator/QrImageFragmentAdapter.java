@@ -1,6 +1,8 @@
 package seta.noip.me.ppcalculator;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -23,6 +25,8 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.math.BigDecimal;
 
 public class QrImageFragmentAdapter extends FragmentPagerAdapter {
@@ -36,9 +40,18 @@ public class QrImageFragmentAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        AnyId anyId = activity.getAnyId();
         BigDecimal amount = activity.getAmount();
-        return QrFragment.newInstance(activity, anyId, amount);
+        return QrFragment.newInstance(activity, position, amount, activity.changeLsnr);
+    }
+
+    @Nullable
+    public Bitmap getQR(int position) {
+        BigDecimal amount = activity.getAmount();
+        AnyId id = QrFragment.loadPreferencePPID(activity, position);
+        if (null == id) {
+            return null;
+        }
+        return QrFragment.showAnyIdQR(activity, id, amount);
     }
 
     @Override
@@ -47,6 +60,51 @@ public class QrImageFragmentAdapter extends FragmentPagerAdapter {
     }
 
     public static class QrFragment extends Fragment {
+        private AnyId anyId;
+        private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+
+        public void addPropertyChangeListener(PropertyChangeListener listener) {
+            this.pcs.addPropertyChangeListener(listener);
+        }
+
+        public void removePropertyChangeListener(PropertyChangeListener listener) {
+            this.pcs.removePropertyChangeListener(listener);
+        }
+
+        private static AnyId loadPreferencePPID(Activity ctx, int position) {
+            SharedPreferences pref = ctx.getPreferences(Context.MODE_PRIVATE);
+            AnyId id = new AnyId();
+            if (position == 0) {
+                id.setIdType(pref.getString(ctx.getString(R.string.proxyType), null));
+                id.setIdValue(pref.getString(ctx.getString(R.string.proxy), null));
+                id.setAliasName(pref.getString(ctx.getString(R.string.alias), id.mask()));
+            } else {
+                id.setIdType(pref.getString(ctx.getString(R.string.proxyTypeIndex, position), null));
+                id.setIdValue(pref.getString(ctx.getString(R.string.proxyIndex, position), null));
+                id.setAliasName(pref.getString(ctx.getString(R.string.aliasIndex, position), id.mask()));
+            }
+
+            if (null != id.getIdType() && null != id.getIdValue()) {
+                return id;
+            } else {
+                return null;
+            }
+        }
+
+        public void setValue(AnyId anyId) {
+            AnyId oldValue = anyId;
+            this.anyId = anyId;
+            SharedPreferences pref = getActivity().getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            if (null != anyId) {
+                editor.putString(getString(R.string.proxy), anyId.getIdValue());
+                editor.putString(getString(R.string.proxyType), anyId.getIdType());
+                editor.putString(getString(R.string.alias), anyId.getAliasName());
+                editor.apply();
+            }
+
+            this.pcs.firePropertyChange("anyId", oldValue, anyId);
+        }
 
         static Bitmap showUnknownQR(Context ctx) {
 
@@ -113,29 +171,28 @@ public class QrImageFragmentAdapter extends FragmentPagerAdapter {
             View swipeView = inflater.inflate(R.layout.swipe_fragment, container, false);
             ImageView imageView = (ImageView) swipeView.findViewById(R.id.qrImageView);
             Bundle bundle = getArguments();
-            Context ctx = getActivity();
-            AnyId anyId = new AnyId();
+            Activity ctx = getActivity();
             BigDecimal amount = (BigDecimal) bundle.getSerializable(ctx.getString(R.string.amount));
-            anyId.setIdType(bundle.getString(ctx.getString(R.string.proxyType)));
-            anyId.setIdValue(bundle.getString(ctx.getString(R.string.proxy)));
+            int position = bundle.getInt("position");
+            anyId = loadPreferencePPID(ctx, position);
 
-            if (null == anyId.getIdType() && null == anyId.getIdValue()) {
+            if (null == anyId) {
                 imageView.setImageResource(R.drawable.ic_add_box_black_24dp);
             } else {
                 imageView.setImageBitmap(showAnyIdQR(ctx, anyId, amount));
+                this.pcs.firePropertyChange("anyId", null, anyId);
             }
+
             return swipeView;
         }
 
-        static QrFragment newInstance(Context ctx, AnyId anyId, BigDecimal amount) {
+        static QrFragment newInstance(Context ctx, int position, BigDecimal amount, PropertyChangeListener changeLsnr) {
             QrFragment swipeFragment = new QrFragment();
             Bundle bundle = new Bundle();
             bundle.putSerializable(ctx.getString(R.string.amount), amount);
-            if (null != anyId) {
-                bundle.putString(ctx.getString(R.string.proxyType), anyId.getIdType());
-                bundle.putString(ctx.getString(R.string.proxy), anyId.getIdValue());
-            }
+            bundle.putInt("position", position);
             swipeFragment.setArguments(bundle);
+            swipeFragment.addPropertyChangeListener(changeLsnr);
             return swipeFragment;
         }
     }
