@@ -8,21 +8,18 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
-import android.support.v4.app.Fragment;
+import android.os.Bundle;
 import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.InputType;
 import android.text.TextPaint;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.amlcurran.showcaseview.ShowcaseView;
@@ -78,7 +75,6 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         setupHandlers();
-
         amount = (BigDecimal) getIntent().getSerializableExtra("amount");
         if (null == amount) amount = BigDecimal.ZERO;
         amount = amount.setScale(2, BigDecimal.ROUND_DOWN);
@@ -87,6 +83,7 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         swipeFragmentAdapter = new QrImageFragmentAdapter(getSupportFragmentManager(), this);
         viewPager.setAdapter(swipeFragmentAdapter);
 
+        manageNavIconVisibility(0);
         textView2.setText("");
     }
 
@@ -190,6 +187,27 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
             }
         });
 
+        viewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                manageNavIconVisibility(position);
+            }
+        });
+    }
+
+    private void manageNavIconVisibility(int position) {
+        if (viewPager.getAdapter().getCount()-1 == position) {
+            rightNav.setVisibility(View.INVISIBLE);
+        }
+        else {
+            rightNav.setVisibility(View.VISIBLE);
+        }
+        if (position == 0) {
+            leftNav.setVisibility(View.INVISIBLE);
+        }
+        else {
+            leftNav.setVisibility(View.VISIBLE);
+        }
     }
 
     private void onClickCalculator() {
@@ -317,6 +335,12 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    public int getProxyCount() {
+        SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+        int i = pref.getInt(getString(R.string.proxyCount), 0);
+        return i;
     }
 
     private void setupProxyInfo() {

@@ -54,9 +54,15 @@ public class QrImageFragmentAdapter extends FragmentPagerAdapter {
         return QrFragment.showAnyIdQR(activity, id, amount);
     }
 
+    /**
+     * Get the number of QR pages. This is the number of promptpay ID stored in preference + 1 page for creating new ID
+     * @return the number of currently available promptpay ID + 1
+     */
     @Override
     public int getCount() {
-        return 1;
+        SharedPreferences pref = activity.getPreferences(Context.MODE_PRIVATE);
+        int i = pref.getInt(activity.getString(R.string.proxyCount), 0);
+        return i + 1;
     }
 
     public static class QrFragment extends Fragment {
@@ -71,6 +77,15 @@ public class QrImageFragmentAdapter extends FragmentPagerAdapter {
             this.pcs.removePropertyChangeListener(listener);
         }
 
+        /**
+         * Read the preference for promptpay ID information, based on the position.
+         * First promptpay ID is stored in "proxyType" key.
+         * Second onwards are stored in "proxyType.1", "proxyType.2" onwards
+         *
+         * @param ctx
+         * @param position 0-based position
+         * @return null if there is no ID at that position, otherwise valid AnyId object.
+         */
         private static AnyId loadPreferencePPID(Activity ctx, int position) {
             SharedPreferences pref = ctx.getPreferences(Context.MODE_PRIVATE);
             AnyId id = new AnyId();
