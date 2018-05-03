@@ -12,7 +12,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.text.TextPaint;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,7 +29,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.math.BigDecimal;
 
-public class QrImageFragmentAdapter extends FragmentPagerAdapter {
+public class QrImageFragmentAdapter extends FragmentStatePagerAdapter {
 
     private final GenerateQrCodeActivity activity;
 
@@ -52,6 +52,11 @@ public class QrImageFragmentAdapter extends FragmentPagerAdapter {
             return null;
         }
         return QrFragment.showAnyIdQR(activity, id, amount);
+    }
+
+    @Override
+    public int getItemPosition(Object object) {
+        return POSITION_NONE;
     }
 
     /**
@@ -82,7 +87,7 @@ public class QrImageFragmentAdapter extends FragmentPagerAdapter {
          * First promptpay ID is stored in "proxyType" key.
          * Second onwards are stored in "proxyType.1", "proxyType.2" onwards
          *
-         * @param ctx
+         * @param ctx context for loading preference
          * @param position 0-based position
          * @return null if there is no ID at that position, otherwise valid AnyId object.
          */
@@ -107,7 +112,7 @@ public class QrImageFragmentAdapter extends FragmentPagerAdapter {
         }
 
         public void setValue(AnyId anyId) {
-            AnyId oldValue = anyId;
+            AnyId oldValue = this.anyId;
             this.anyId = anyId;
             SharedPreferences pref = getActivity().getPreferences(Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
@@ -166,7 +171,6 @@ public class QrImageFragmentAdapter extends FragmentPagerAdapter {
 
                 for (int x = 0; x < width; x++) {
                     for (int y = 0; y < height; y++) {
-
                         newImage.setPixel(x , y, bitMatrix.get(x,y) ? Color.BLACK : Color.WHITE);
                     }
                 }

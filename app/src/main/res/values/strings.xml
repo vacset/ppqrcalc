@@ -14,6 +14,7 @@
     <string name="proxyIndex" translatable="false">proxy.%1$d</string>
     <string name="aliasIndex" translatable="false">alias.%1$d</string>
     <string name="amount" translatable="false">amount</string>
+    <string name="proxyCount" translatable="false">proxyCount</string>
 
     <!-- labels -->
     <string name="qr_error">Error</string>

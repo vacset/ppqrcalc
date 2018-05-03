@@ -79,10 +79,21 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         if (null == amount) amount = BigDecimal.ZERO;
         amount = amount.setScale(2, BigDecimal.ROUND_DOWN);
 
+        // the following block is for testing by directly setting promptpay ID into preference
+        /*
+        SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString(getString(R.string.proxy), "3100602152163");
+        editor.putString(getString(R.string.proxyType), PromptPayQR.BOT_ID_MERCHANT_TAX_ID);
+        editor.putString(getString(R.string.alias), "3100602152163");
+        editor.apply();
+        */
+        // the above block is for testing by directly setting promptpay ID into preference
+
         setupQrImage();
         swipeFragmentAdapter = new QrImageFragmentAdapter(getSupportFragmentManager(), this);
         viewPager.setAdapter(swipeFragmentAdapter);
-
+        swipeFragmentAdapter.notifyDataSetChanged();
         manageNavIconVisibility(0);
         textView2.setText("");
     }
@@ -383,6 +394,8 @@ public class GenerateQrCodeActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK && requestCode == AMOUNT_REQUEST) {
             amount = (BigDecimal) data.getSerializableExtra("amount");
             if (null == amount) amount = BigDecimal.ZERO;
+            swipeFragmentAdapter.notifyDataSetChanged();
+
             setupQrImage();
         }
     }
